@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import SystemStatusBar from './SystemStatusBar';
 import { subscribeToIntegrations } from '../services/mockData';
 import { AlertOctagon, X, Search } from 'lucide-react';
 
@@ -18,9 +19,10 @@ export default function Layout() {
     <div className="app-layout">
       <Sidebar />
       <main className="main-content">
+        <SystemStatusBar />
         {alert && (
           <div style={{
-            position: 'absolute', top: 30, right: 30, zIndex: 9999,
+            position: 'absolute', top: 50, right: 30, zIndex: 9999,
             background: 'var(--bg-glass)', border: '1px solid var(--neon-red)',
             borderRadius: 12, padding: 20, width: 380,
             boxShadow: 'var(--shadow-lg), 0 0 30px var(--neon-red-glow)',
