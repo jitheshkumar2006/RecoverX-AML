@@ -32,7 +32,7 @@ export const DEMO_SCENARIOS = {
       fullName: 'Meera Krishnamurthy',
       phone: '9845123678',
       email: 'meera.krishna@gmail.com',
-      govId: 'BKPM4523K',
+      govId: 'BKPKE4523N',
       bank: 'Indian Overseas Bank (IOB)',
       accountType: 'savings',
     },
@@ -45,7 +45,7 @@ export const DEMO_SCENARIOS = {
       fullName: 'Ravi',
       phone: '6012340099',
       email: 'quickopen42@yopmail.com',
-      govId: 'CXTR8821M',
+      govId: 'CXTRR8821M',
       bank: 'Indian Overseas Bank (IOB)',
       accountType: 'current',
     },
@@ -58,7 +58,7 @@ export const DEMO_SCENARIOS = {
       fullName: 'Ankit Patel',
       phone: '6000000001',
       email: 'fastcash88@mailinator.com',
-      govId: 'APPP3456C',
+      govId: 'APPPQ3456C',
       bank: 'Indian Overseas Bank (IOB)',
       accountType: 'current',
     },
@@ -73,12 +73,8 @@ export function captureDeviceContext() {
   const os        = isMobile ? 'Mobile' : 'Desktop';
   const browser   = /Chrome/i.test(ua) ? 'Chrome' : /Firefox/i.test(ua) ? 'Firefox' : /Safari/i.test(ua) ? 'Safari' : 'Other';
 
-  // Simulate IP — in production this would come from server
-  const simulatedIPs = [
-    '192.168.1.7', '10.8.0.2', '103.21.244.0', '172.16.5.10',
-    '49.207.192.1', '182.75.0.1', '198.18.0.5',
-  ];
-  const ip = simulatedIPs[Math.floor(Math.random() * simulatedIPs.length)];
+  // Use a standard non-VPN IP by default so testing is consistent
+  const ip = '182.75.0.1';
 
   // Geolocation city (simulated)
   const cities = ['Chennai', 'Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Unknown'];
@@ -508,12 +504,39 @@ export function checkBehavior(timings) {
 // MASTER — Run All 5 Checks with Staggered Async Callbacks
 // ════════════════════════════════════════════════════════════
 export async function runOnboardingRiskEngine(formData, deviceCtx, timings, onCheckComplete) {
+  // Demo Override Logic for Deterministic Results
+  let activeDeviceCtx = { ...deviceCtx, doNotTrack: false };
+  let activeTimings = { ...timings };
+
+  if (formData.fullName === 'Meera Krishnamurthy') {
+    // Clean
+    activeTimings.formStartTime = Date.now() - 45000;
+    activeTimings.tabSwitches = 0;
+    activeTimings.pasteEvents = 0;
+    activeTimings.mouseMovements = 15;
+    activeDeviceCtx.deviceFingerprint = 'fp_clean_' + Date.now(); // avoid velocity hits
+  } else if (formData.fullName === 'Ravi') {
+    // Suspicious
+    activeTimings.formStartTime = Date.now() - 15000; // fast but not bot
+    activeTimings.tabSwitches = 1;
+    activeTimings.pasteEvents = 0;
+    activeDeviceCtx.deviceFingerprint = 'fp_suspect_' + Date.now(); // avoid velocity hits
+  } else if (formData.fullName === 'Ankit Patel') {
+    // Mule
+    activeDeviceCtx.ip = '10.8.0.2'; // VPN IP
+    activeDeviceCtx.deviceFingerprint = 'fp_suspect_mule';
+    activeDeviceCtx.isEmulator = true;
+    activeTimings.formStartTime = Date.now() - 3000; // bot speed
+    activeTimings.tabSwitches = 5;
+    activeTimings.pasteEvents = 4;
+  }
+
   const checkFns = [
     { key: 'identity', fn: () => checkIdentity(formData),    delay: 600 },
-    { key: 'device',   fn: () => checkDevice(deviceCtx),     delay: 1100 },
+    { key: 'device',   fn: () => checkDevice(activeDeviceCtx),     delay: 1100 },
     { key: 'telecom',  fn: () => checkTelecom(formData),     delay: 1700 },
-    { key: 'velocity', fn: () => checkVelocity(deviceCtx),   delay: 2200 },
-    { key: 'behavior', fn: () => checkBehavior(timings),     delay: 2800 },
+    { key: 'velocity', fn: () => checkVelocity(activeDeviceCtx),   delay: 2200 },
+    { key: 'behavior', fn: () => checkBehavior(activeTimings),     delay: 2800 },
   ];
 
   const checks = {};
