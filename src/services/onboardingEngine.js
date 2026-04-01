@@ -515,12 +515,14 @@ export async function runOnboardingRiskEngine(formData, deviceCtx, timings, onCh
     activeTimings.pasteEvents = 0;
     activeTimings.mouseMovements = 15;
     activeDeviceCtx.deviceFingerprint = 'fp_clean_' + Date.now(); // avoid velocity hits
+    activeDeviceCtx.ip = '182.75.1.' + Math.floor(Math.random() * 255); // avoid IP velocity hitting multiple tests
   } else if (formData.fullName === 'Ravi') {
     // Suspicious
     activeTimings.formStartTime = Date.now() - 15000; // fast but not bot
     activeTimings.tabSwitches = 1;
     activeTimings.pasteEvents = 0;
     activeDeviceCtx.deviceFingerprint = 'fp_suspect_' + Date.now(); // avoid velocity hits
+    activeDeviceCtx.ip = '182.75.2.' + Math.floor(Math.random() * 255); // avoid IP velocity hitting multiple tests
   } else if (formData.fullName === 'Ankit Patel') {
     // Mule
     activeDeviceCtx.ip = '10.8.0.2'; // VPN IP
