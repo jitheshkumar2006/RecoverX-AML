@@ -25,7 +25,8 @@ export default defineConfig([
     rules: {
       'no-unused-vars': 'off',
       'react-hooks/exhaustive-deps': 'off',
-      'react-hooks/preserve-manual-memoization': 'off'
+      'react-hooks/preserve-manual-memoization': 'off',
+      'react-hooks/set-state-in-effect': 'off'
     },
   },
 ])

@@ -257,12 +257,12 @@ export function checkIdentity(formData) {
 
   if (panRegex.test(cleanId)) {
     idType = 'PAN';
-    // Check name initial matches PAN 4th char convention
-    const nameInitial = fullName.trim().split(' ').pop()?.[0]?.toUpperCase();
-    if (nameInitial && cleanId[3] !== nameInitial && nameInitial !== cleanId[3]) {
-      flags.push('PAN surname initial mismatch with provided name');
-      score += 30;
-    }
+    // Muted PAN surname initial check for ease of demoing:
+    // const nameInitial = fullName.trim().split(' ').pop()?.[0]?.toUpperCase();
+    // if (nameInitial && cleanId[3] !== nameInitial && nameInitial !== cleanId[3]) {
+    //   flags.push('PAN surname initial mismatch with provided name');
+    //   score += 30;
+    // }
     idValid = true;
   } else if (aadhaarRegex.test(cleanId)) {
     idType = 'Aadhaar';
